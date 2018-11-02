@@ -44,10 +44,12 @@ class tool_inactive_user_cleanup_config_form extends moodleform {
         // Inactive or suspended?
         $mform->addElement('advcheckbox', 'config_inactiveorsuspended', get_string('inactiveorsuspended', 'tool_inactive_user_cleanup'));
         $mform->addHelpButton('config_inactiveorsuspended', 'inactiveorsuspended', 'tool_inactive_user_cleanup');
+        $mform->setDefault('config_inactiveorsuspended', '1');
 
         // Delete or anonymize.
         $mform->addElement('advcheckbox', 'config_deleteoranon', get_string('deleteoranon', 'tool_inactive_user_cleanup'));
         $mform->addHelpButton('config_deleteoranon', 'deleteoranon', 'tool_inactive_user_cleanup');
+        $mform->setDefault('config_deleteoranon', '1');
 
         // Form for email subject and text.
         $mform->addElement('header', 'config_headeremail', get_string('emailsetting', 'tool_inactive_user_cleanup'));
