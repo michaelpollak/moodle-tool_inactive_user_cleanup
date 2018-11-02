@@ -76,16 +76,10 @@ function tool_inactive_user_cleanup_cron() {
 
                     // Delete or anonymize user.
                     if  ($deleteoranon) {
-                        $dataobject = (object) ['id' => $usersdetails->id];
-                        $keyword = ''; // Either use keyword or just remove personal info.
-                        $dataobject->username = $dataobject->idnumber = $dataobject->password = $keyword;
-                        $dataobject->firstname = $dataobject->lastname = $dataobject->email = $keyword;
-                        $dataobject->deleted = '1';
-                        $DB->update_record('user', $dataobject);
+                        anon_user($usersdetails);
                     } else {
                         delete_user($usersdetails);
                     }
-
                 }
             } else {
                 $ischeck = $DB->get_record('tool_inactive_user_cleanup', array('userid' => $usersdetails->id));
@@ -108,13 +102,18 @@ function tool_inactive_user_cleanup_cron() {
             if ($beforedelete != 0) {
                 $deleteuserafternotify = $DB->get_record('tool_inactive_user_cleanup', array('userid' => $usersdetails->id));
                 if (!empty($deleteuserafternotify)) {
-                    mtrace('days before delete'. strtotime('+'.$beforedelete.' day', $deleteuserafternotify->date));
+                    mtrace('days before delete '. strtotime('+'.$beforedelete.' day', $deleteuserafternotify->date));
                     $minus_timestamp = strtotime('+' . $minus .' days');
 
                     if (($minus_timestamp) >= ( strtotime('+'.$beforedelete.' day', $deleteuserafternotify->date) )) {
                         if (!isguestuser($usersdetails->id)) {
-                            delete_user($usersdetails);
-                            mtrace('delete user' . $usersdetails->id);
+                            // Delete or anonymize user.
+                            if  ($deleteoranon) {
+                                anon_user($usersdetails);
+                            } else {
+                                delete_user($usersdetails);
+                            }
+                            mtrace('Processed user ' . $usersdetails->id);
                         }
                     }
                 }
@@ -122,4 +121,13 @@ function tool_inactive_user_cleanup_cron() {
         }
     }
     return true;
+}
+
+function anon_user($usersdetails) {
+    $dataobject = (object) ['id' => $usersdetails->id];
+    $keyword = ''; // Either use keyword or just remove personal info.
+    $dataobject->username = $dataobject->idnumber = $dataobject->password = $keyword;
+    $dataobject->firstname = $dataobject->lastname = $dataobject->email = $keyword;
+    $dataobject->deleted = '1';
+    $DB->update_record('user', $dataobject);
 }
