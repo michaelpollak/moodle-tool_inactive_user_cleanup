@@ -9,6 +9,8 @@ You will now be able to access Server -> User Cleanup (admin/tool/inactive_user_
 
 ### Menu
 
+![Interface](https://github.com/michaelpollak/moodle-tool_inactive_user_cleanup/blob/master/docs/menu.png)
+
 There are multiple options for admins to consider. You can setup the time in days after what period users will be filtered and processed.
 Next you will see the field **Days before deletion**, this is inportant if you want to warn your users before removing them from the database.
 * The default is -1, we will not send the user a notification and just process its account.
