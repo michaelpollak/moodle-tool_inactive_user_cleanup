@@ -41,6 +41,7 @@ function tool_inactive_user_cleanup_cron() {
     $inactivity = get_config('tool_inactive_user_cleanup', 'daysofinactivity');
     $inactiveorsuspended = get_config('tool_inactive_user_cleanup', 'inactiveorsuspended');
     $deleteoranon = get_config('tool_inactive_user_cleanup', 'deleteoranon');
+    $mailforadmin = '';
 
     if ($inactiveorsuspended) {
         $users = $DB->get_records('user', array('suspended' => '1', 'deleted' => '0')); // Only check already suspended users.
@@ -71,8 +72,10 @@ function tool_inactive_user_cleanup_cron() {
                 // We will delete this user without sending mails.
                 if (!isguestuser($usersdetails->id)) {
                     // Log for future reference.
-                    mtrace($logtxt = 'Deleted user ' . $usersdetails->id . ' with the name ' . $usersdetails->username . '.');
-                    // email_to_user(get_admin(), get_admin(), $logtxt, $logtxt); // Send mail to admin.
+                    mtrace($logtxt = 'Processed user ' . $usersdetails->id . ' with the name ' . $usersdetails->username . '.');
+
+                    // Write report for admin.
+                    $mailforadmin .= $logtxt . '<br>';
 
                     // Delete or anonymize user.
                     if  ($deleteoranon) {
@@ -82,6 +85,7 @@ function tool_inactive_user_cleanup_cron() {
                     }
                 }
             } else {
+                // Keep the default behaviour intact.
                 $ischeck = $DB->get_record('tool_inactive_user_cleanup', array('userid' => $usersdetails->id));
 
                 if (!$ischeck) {
@@ -98,36 +102,53 @@ function tool_inactive_user_cleanup_cron() {
                         $lastinsertid = $DB->insert_record('tool_inactive_user_cleanup', $record, false);
                     }
                 }
-            }
-            if ($beforedelete != 0) {
-                $deleteuserafternotify = $DB->get_record('tool_inactive_user_cleanup', array('userid' => $usersdetails->id));
-                if (!empty($deleteuserafternotify)) {
-                    mtrace('days before delete '. strtotime('+'.$beforedelete.' day', $deleteuserafternotify->date));
-                    $minus_timestamp = strtotime('+' . $minus .' days');
 
-                    if (($minus_timestamp) >= ( strtotime('+'.$beforedelete.' day', $deleteuserafternotify->date) )) {
-                        if (!isguestuser($usersdetails->id)) {
-                            // Delete or anonymize user.
-                            if  ($deleteoranon) {
-                                anon_user($usersdetails);
-                            } else {
-                                delete_user($usersdetails);
+                if ($beforedelete != 0) {
+                    $deleteuserafternotify = $DB->get_record('tool_inactive_user_cleanup', array('userid' => $usersdetails->id));
+                    if (!empty($deleteuserafternotify)) {
+                        mtrace('days before delete '. strtotime('+'.$beforedelete.' day', $deleteuserafternotify->date));
+                        $minus_timestamp = strtotime('+' . $minus .' days');
+
+                        if (($minus_timestamp) >= ( strtotime('+'.$beforedelete.' day', $deleteuserafternotify->date) )) {
+                            if (!isguestuser($usersdetails->id)) {
+
+                                // Log for future reference.
+                                mtrace($logtxt = 'Processed user ' . $usersdetails->id . ' with the name ' . $usersdetails->username . '.');
+
+                                // Write report for admin.
+                                $mailforadmin .= $logtxt . '<br>';
+
+                                // Delete or anonymize user.
+                                if  ($deleteoranon) {
+                                    anon_user($usersdetails);
+                                } else {
+                                    delete_user($usersdetails);
+                                }
                             }
-                            mtrace('Processed user ' . $usersdetails->id);
                         }
                     }
                 }
             }
         }
     }
+
+    // Send report mail to admin if sth. needs reporting.
+    if ($mailforadmin != '') {
+        email_to_user(get_admin(), get_admin(), 'User Cleanup report', $mailforadmin);
+    }
+
     return true;
 }
 
 function anon_user($usersdetails) {
+    global $DB;
     $dataobject = (object) ['id' => $usersdetails->id];
     $keyword = ''; // Either use keyword or just remove personal info.
-    $dataobject->username = $dataobject->idnumber = $dataobject->password = $keyword;
-    $dataobject->firstname = $dataobject->lastname = $dataobject->email = $keyword;
+    $dataobject->username = 'anon_' . $usersdetails->id;
+    $dataobject->timemodified = time();
     $dataobject->deleted = '1';
+    $dataobject->idnumber = $dataobject->password = $keyword;
+    $dataobject->firstname = $dataobject->lastname = $dataobject->email = $keyword;
+    $dataobject->lastip = $dataobject->description = $keyword;
     $DB->update_record('user', $dataobject);
 }
