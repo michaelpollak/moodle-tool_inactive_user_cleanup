@@ -75,7 +75,7 @@ function tool_inactive_user_cleanup_cron() {
                     mtrace($logtxt = 'Processed user ' . $usersdetails->id . ' with the name ' . $usersdetails->username . '.');
 
                     // Write report for admin.
-                    $mailforadmin .= $logtxt . '<br>';
+                    $mailforadmin .= $logtxt . "\r\n";
 
                     // Delete or anonymize user.
                     if  ($deleteoranon) {
@@ -116,7 +116,7 @@ function tool_inactive_user_cleanup_cron() {
                                 mtrace($logtxt = 'Processed user ' . $usersdetails->id . ' with the name ' . $usersdetails->username . '.');
 
                                 // Write report for admin.
-                                $mailforadmin .= $logtxt . '<br>';
+                                $mailforadmin .= $logtxt . "\r\n";
 
                                 // Delete or anonymize user.
                                 if  ($deleteoranon) {
