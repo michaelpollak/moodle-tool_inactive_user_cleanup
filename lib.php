@@ -31,7 +31,7 @@
 require_once($CFG->libdir.'/adminlib.php');
 has_capability('moodle/user:delete', context_system::instance());
 
-function tool_inactive_user_cleanup_cron() {
+function tool_inactive_user_cleanup_notcron() {
     global $DB, $CFG;
 
     mtrace("Hey, admin tool inactive user cleanup is running");
@@ -92,6 +92,7 @@ function tool_inactive_user_cleanup_cron() {
                     mtrace("!$ischeck");
                     $record = new stdClass();
                     $record->userid = $usersdetails->id;
+                    /*
                     if (email_to_user($usersdetails, $mainadminuser, $subject, $messagetext)) {
                         mtrace('id');
                         mtrace($usersdetails->id. '---' .$usersdetails->email);
@@ -101,6 +102,7 @@ function tool_inactive_user_cleanup_cron() {
                         $record->date = time();
                         $lastinsertid = $DB->insert_record('tool_inactive_user_cleanup', $record, false);
                     }
+                    */
                 }
 
                 if ($beforedelete != 0) {

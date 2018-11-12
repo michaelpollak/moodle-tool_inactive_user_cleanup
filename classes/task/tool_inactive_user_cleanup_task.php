@@ -40,6 +40,6 @@ class tool_inactive_user_cleanup_task extends \core\task\scheduled_task {
     public function execute() {
         global $CFG;
         require_once($CFG->dirroot . '/admin/tool/inactive_user_cleanup/lib.php');
-        tool_inactive_user_cleanup_cron(); // Just execute the legacy function.
+        tool_inactive_user_cleanup_notcron(); // Just execute the legacy function.
     }
 }// End of class
