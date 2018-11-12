@@ -92,7 +92,6 @@ function tool_inactive_user_cleanup_notcron() {
                     mtrace("!$ischeck");
                     $record = new stdClass();
                     $record->userid = $usersdetails->id;
-                    /*
                     if (email_to_user($usersdetails, $mainadminuser, $subject, $messagetext)) {
                         mtrace('id');
                         mtrace($usersdetails->id. '---' .$usersdetails->email);
@@ -102,7 +101,6 @@ function tool_inactive_user_cleanup_notcron() {
                         $record->date = time();
                         $lastinsertid = $DB->insert_record('tool_inactive_user_cleanup', $record, false);
                     }
-                    */
                 }
 
                 if ($beforedelete != 0) {
