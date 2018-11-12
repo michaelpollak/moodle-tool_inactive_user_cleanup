@@ -65,7 +65,7 @@ function tool_inactive_user_cleanup_notcron() {
             $minus = round((time() - $usersdetails->lastaccess)/60/60/24); // This checks for access.
         }
 
-        if ($minus > $inactivity) {
+        if ($minus > $inactivity && $inactivity > 0) {
             // In case beforedelete is -1 we don't want any mails to be sent.
             if ($beforedelete == "-1") {
 
